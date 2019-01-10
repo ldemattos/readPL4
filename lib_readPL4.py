@@ -64,7 +64,7 @@ def readPL4(pl4file):
 			                        'TO': h[2]}, ignore_index=True)
 		
 		# read and store actual data, map it to a numpy read only array
-		data = np.memmap(f,dtype=np.float32,mode='r',shape=(steps,nvar+1),offset=5*16 + nvar*16) # 302s
+		data = np.memmap(f,dtype=np.float32,mode='r',shape=(steps,nvar+1),offset=5*16 + nvar*16)
 			
 		return dfHEAD,data
 
