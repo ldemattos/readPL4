@@ -63,13 +63,8 @@ def readPL4(pl4file):
 			                        'FROM': h[1],\
 			                        'TO': h[2]}, ignore_index=True)
 		
-		# store read
-		data = np.zeros(shape=(steps,nvar+1))
-		offset = nvar+1
-		for i in xrange(0,steps):
-			pos = 5*16 + nvar*16 + i*offset*4
-			d = struct.unpack('<'+str(offset)+'f',pl4[pos:pos+4*offset])
-			data[i,:] = d
+		# read and store actual data, map it to a numpy read only array
+		data = np.memmap(f,dtype=np.float32,mode='r',shape=(steps,nvar+1),offset=5*16 + nvar*16) # 302s
 			
 		return dfHEAD,data
 

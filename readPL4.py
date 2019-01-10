@@ -34,7 +34,7 @@ def main(args):
 	# Convert the header type
 	convertType(dfHEAD)
 	
-	# Lançar sessão do IPython
+	# Launch ipython session
 	# ~ import IPython as ipy
 	# ~ ipy.embed()
 	
