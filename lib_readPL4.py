@@ -22,6 +22,7 @@
 #  
 #  
 
+# Read PISA's binary PL4
 def readPL4(pl4file):
 	
 	import mmap
@@ -70,10 +71,20 @@ def readPL4(pl4file):
 		
 		# store read
 		data = np.zeros(shape=(steps,nvar+1))
+		offset = nvar+1
 		for i in xrange(0,steps):
-			offset = (nvar+1)	
 			pos = 5*16 + nvar*16 + i*offset*4
 			d = struct.unpack('<'+str(offset)+'f',pl4[pos:pos+4*offset])
 			data[i,:] = d
 			
 		return dfHEAD,data
+
+# Convert types from integers to strings
+def convertType(df):
+	
+	df['TYPE'] = df['TYPE'].apply(lambda x: 'V-node' if x == 4 else x)
+	df['TYPE'] = df['TYPE'].apply(lambda x: 'V-bran' if x == 8 else x)
+	df['TYPE'] = df['TYPE'].apply(lambda x: 'I-bran' if x == 9 else x)
+	
+	return 0
+	

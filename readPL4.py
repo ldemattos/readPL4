@@ -24,14 +24,18 @@
 
 import sys
 from lib_readPL4 import readPL4
-import IPython as ipy
+from lib_readPL4 import convertType
 
 def main(args):
 	
 	# Call the library
 	dfHEAD,data = readPL4(sys.argv[1])
 	
-	# launch ipython session
+	# Convert the header type
+	convertType(dfHEAD)
+	
+	# Lançar sessão do IPython
+	# ~ import IPython as ipy
 	# ~ ipy.embed()
 	
 	return 0
