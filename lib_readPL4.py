@@ -34,14 +34,8 @@ def readPL4(pl4file):
 	with open(pl4file, 'rb') as f:
 		pl4 = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
 		
-		# read tmax
-		# ~ tmax = struct.unpack('<f', pl4[36:40])[0]
-		# ~ print "TMAX=%f"%(tmax)
-		
-		# read deltat
+		# read DELTAT
 		deltat = struct.unpack('<f', pl4[40:44])[0]
-		# ~ deltat = struct.unpack('<f', pl4[36:40])[0]
-		# ~ print "DELTAT = %b %f"%(pl4[40:44],deltat)
 		print "DELTAT=%f"%(deltat)
 	
 		# read number of vars
