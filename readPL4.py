@@ -25,18 +25,26 @@
 import sys
 from lib_readPL4 import readPL4
 from lib_readPL4 import convertType
+import numpy as np
 
 def main(args):
 	
 	# Call the library
-	dfHEAD,data = readPL4(sys.argv[1])
+	dfHEAD,data,miscData = readPL4(sys.argv[1])
+	
+	# Give some information to the user
+	print "PL4 Header info:"
+	print miscData
+	
+	print "Data shape:"
+	print np.shape(data)
 	
 	# Convert the header type
 	convertType(dfHEAD)
 	
 	# Launch ipython session
-	# ~ import IPython as ipy
-	# ~ ipy.embed()
+	import IPython as ipy
+	ipy.embed()
 	
 	return 0
 
