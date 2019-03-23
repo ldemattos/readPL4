@@ -82,3 +82,19 @@ def convertType(df):
 	
 	return 0
 	
+# Get desired variable data
+def getVarData(dfHEAD,data,Type,From,To):
+	
+	import numpy as np
+	
+	# Search for desired data in header
+	df = dfHEAD[(dfHEAD['TYPE'] == Type) & (dfHEAD['FROM'] == From) & (dfHEAD['TO'] == To)]
+				
+	if not df.empty:
+		data_sel = data[:,df.index.values[0]+1] # One column shift given time vector
+		
+	else:
+		print "Variable %s-%s of %s not found!"%(From,To,Type) 
+		return(None)
+
+	return(data_sel)

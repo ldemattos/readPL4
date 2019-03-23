@@ -25,6 +25,7 @@
 import sys
 from lib_readPL4 import readPL4
 from lib_readPL4 import convertType
+from lib_readPL4 import getVarData
 import numpy as np
 
 def main(args):
@@ -41,6 +42,15 @@ def main(args):
 	
 	# Convert the header type
 	convertType(dfHEAD)
+	
+	# EXAMPLES
+	###############################################################
+	# Get time
+	time = data[:,0]
+	
+	# Get some variable, remember ATP's variable has a maximum of 6 characters
+	# Check for var types in github wiki
+	# ~ sel_data = getVarData(dfHEAD,data,'TYPE','FROM','TO')
 	
 	# Launch ipython session
 	import IPython as ipy
