@@ -85,8 +85,6 @@ def convertType(df):
 # Get desired variable data
 def getVarData(dfHEAD,data,Type,From,To):
 	
-	import numpy as np
-	
 	# Search for desired data in header
 	df = dfHEAD[(dfHEAD['TYPE'] == Type) & (dfHEAD['FROM'] == From) & (dfHEAD['TO'] == To)]
 				
