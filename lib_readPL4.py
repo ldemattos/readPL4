@@ -68,8 +68,15 @@ def readPL4(pl4file):
 			                        'FROM': h[1],\
 			                        'TO': h[2]}, ignore_index=True)
 		
+		# Check for unexpected rows of zeroes
+		# See https://github.com/ldemattos/readPL4/issues/2
+		expsize = (5 + miscData['nvar'])*16 + miscData['steps']*(miscData['nvar']+1)*4
+		nullbytes = 0
+		if miscData['pl4size'] > expsize: 
+			nullbytes = miscData['pl4size']-expsize
+		
 		# read and store actual data, map it to a numpy read only array
-		data = np.memmap(f,dtype=np.float32,mode='r',shape=(miscData['steps'],miscData['nvar']+1),offset=5*16 + miscData['nvar']*16)
+		data = np.memmap(f,dtype=np.float32,mode='r',shape=(miscData['steps'],miscData['nvar']+1),offset=(5 + miscData['nvar'])*16 + nullbytes)
 			
 		return dfHEAD,data,miscData
 
