@@ -40,17 +40,20 @@ def main(args):
 	print "Data shape:"
 	print np.shape(data)
 	
-	# Convert the header type
-	convertType(dfHEAD)
-	
 	# EXAMPLES
 	###############################################################
 	# Get time
 	time = data[:,0]
 	
 	# Get some variable, remember ATP's variable has a maximum of 6 characters
-	# Check for var types in github wiki
+	# Check dfHEAD for var 'TYPE' and 'COMPLEX'
+    # Further information is available at project's github wiki pages
+    #
+    # For time domain simulations:
 	# ~ sel_data = getVarData(dfHEAD,data,'TYPE','FROM','TO')
+    #
+    # For frequency domain simulations:
+	# ~ sel_data = getVarData(dfHEAD,data,'TYPE','FROM','TO','COMPLEX')
 	
 	# Launch ipython session
 	import IPython as ipy
