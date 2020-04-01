@@ -20,15 +20,15 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 #  
-#  
+#
+
+import mmap
+import struct
+import pandas as pd
+import numpy as np
 
 # Read PISA's binary PL4
 def readPL4(pl4file):
-	
-	import mmap
-	import struct
-	import pandas as pd
-	import numpy as np
 	
 	miscData = {
 		'deltat':0.0,
@@ -104,3 +104,41 @@ def getVarData(dfHEAD,data,Type,From,To):
 		return(None)
 
 	return(data_sel)
+
+
+"""
+Information about the meaning of the type codes in the PL4 file is inferred from 
+code in saveToPl4File function in the PlotXY open-source code:
+https://github.com/max-privato/PlotXY_OpenSource/blob/master/CSimOut.cpp
+"""
+type_map = {
+    1: 's', # SM Variable
+    2: 't', # TACS variable
+    3: 'm', # MODELS variable
+    4: 'v', # Node voltage
+    5: 'u', # UM variable
+    6: 'p', # Branch power
+    7: 'e', # Branch energy
+    8: 'v', # Branch voltage
+    9: 'c'} # Branch current
+
+
+def map_name(col_type, col_from, col_to):
+	name_parts = [type_map[col_type]]
+	name_parts.append(str(col_from, 'utf-8').replace(' ', ''))
+	if len(col_to.strip()) > 0:
+		name_parts.append(str(col_to, 'utf-8').replace(' ', ''))
+	return ':'.join(name_parts)
+
+
+def pl4_to_dataframe(filename):
+	"""
+	Read PISA-formatted binary PL4 file into a pandas dataframe.
+
+	:param filename: Filename of PL4 to read from.
+	:return: Pandas dataframe with data from PL4 file.
+	"""
+	dfHEAD, data, miscData = readPL4(filename)
+
+	col_names = [map_name(col.TYPE, col.FROM, col.TO) for col in dfHEAD.itertuples()]
+	return pd.DataFrame(data[:, 1:], index=data[:, 0], columns=col_names)
