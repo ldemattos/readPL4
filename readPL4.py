@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  readPL4.py
@@ -28,17 +28,18 @@ from lib_readPL4 import convertType
 from lib_readPL4 import getVarData
 import numpy as np
 
+
 def main(args):
 	
 	# Call the library
 	dfHEAD,data,miscData = readPL4(sys.argv[1])
 	
 	# Give some information to the user
-	print "PL4 Header info:"
-	print miscData
+	print("PL4 Header info:")
+	print(miscData)
 	
-	print "Data shape:"
-	print np.shape(data)
+	print("Data shape:")
+	print(np.shape(data))
 	
 	# Convert the header type
 	convertType(dfHEAD)
@@ -57,6 +58,7 @@ def main(args):
 	ipy.embed()
 	
 	return 0
+
 
 if __name__ == '__main__':
 	import sys
