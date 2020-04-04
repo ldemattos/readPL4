@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  lib_readPL4.py
@@ -46,13 +46,14 @@ def readPL4(pl4file):
 		miscData['deltat'] = struct.unpack('<f', pl4[40:44])[0]
 	
 		# read number of vars
-		miscData['nvar'] = struct.unpack('<L', pl4[48:52])[0] / 2
+		miscData['nvar'] = struct.unpack('<L', pl4[48:52])[0] // 2
 		
 		# read PL4 disk size
 		miscData['pl4size'] = struct.unpack('<L', pl4[56:60])[0]-1
 		
 		# compute the number of simulation miscData['steps'] from the PL4's file size
-		miscData['steps'] = (miscData['pl4size'] - 5*16 - miscData['nvar']*16) / ((miscData['nvar']+1)*4)
+		miscData['steps'] = (miscData['pl4size'] - 5*16 - miscData['nvar']*16) // \
+							((miscData['nvar']+1)*4)
 		miscData['tmax'] = (miscData['steps']-1)*miscData['deltat']
 		
 		# generate pandas dataframe	to store the PL4's header
@@ -61,7 +62,7 @@ def readPL4(pl4file):
 		dfHEAD['FROM'] = ''
 		dfHEAD['TO'] = ''
 		
-		for i in xrange(0,miscData['nvar']):
+		for i in range(0,miscData['nvar']):
 			pos = 5*16 + i*16
 			h = struct.unpack('3x1c6s6s',pl4[pos:pos+16])
 			dfHEAD = dfHEAD.append({'TYPE': int(h[0]),\
@@ -99,7 +100,7 @@ def getVarData(dfHEAD,data,Type,From,To):
 		data_sel = data[:,df.index.values[0]+1] # One column shift given time vector
 		
 	else:
-		print "Variable %s-%s of %s not found!"%(From,To,Type) 
+		print("Variable %s-%s of %s not found!"%(From,To,Type))
 		return(None)
 
 	return(data_sel)
