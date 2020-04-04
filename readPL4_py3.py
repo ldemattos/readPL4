@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  readPL4.py
+#  readPL4_py3.py
 #  https://github.com/ldemattos/readPL4
 #  
 #  Copyright 2019 Leonardo M. N. de Mattos <l@mattos.eng.br>
