@@ -24,7 +24,6 @@
 
 import sys
 from lib_readPL4 import readPL4
-from lib_readPL4 import convertType
 from lib_readPL4 import getVarData
 import numpy as np
 
