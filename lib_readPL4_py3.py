@@ -57,10 +57,7 @@ def readPL4(pl4file):
 		miscData['tmax'] = (miscData['steps']-1)*miscData['deltat']
 		
 		# generate pandas dataframe	to store the PL4's header
-		dfHEAD = pd.DataFrame()
-		dfHEAD['TYPE'] = ''
-		dfHEAD['FROM'] = ''
-		dfHEAD['TO'] = ''
+		dfHEAD = pd.DataFrame(columns=['TYPE','FROM','TO'])
 		
 		for i in range(0,miscData['nvar']):
 			pos = 5*16 + i*16
@@ -68,6 +65,10 @@ def readPL4(pl4file):
 			dfHEAD = dfHEAD.append({'TYPE': int(h[0]),\
 			                        'FROM': h[1],\
 			                        'TO': h[2]}, ignore_index=True)
+		
+		# Correct 'TO' and 'FROM' columns types
+		dfHEAD['FROM'] = dfHEAD['FROM'].str.decode('utf-8')
+		dfHEAD['TO'] = dfHEAD['TO'].str.decode('utf-8')		
 		
 		# Check for unexpected rows of zeroes
 		# See https://github.com/ldemattos/readPL4/issues/2
@@ -105,11 +106,10 @@ def getVarData(dfHEAD,data,Type,From,To):
 
 	return(data_sel)
 
-"""
-Information about the meaning of the type codes in the PL4 file is inferred from 
-code in saveToPl4File function in the PlotXY open-source code:
-https://github.com/max-privato/PlotXY_OpenSource/blob/master/CSimOut.cpp
-"""
+
+# Information about the meaning of the type codes in the PL4 file is inferred from 
+# code in saveToPl4File function in the PlotXY open-source code:
+# https://github.com/max-privato/PlotXY_OpenSource/blob/master/CSimOut.cpp
 type_map = {
     1: 's', # SM Variable
     2: 't', # TACS variable
@@ -123,18 +123,16 @@ type_map = {
 
 def map_name(col_type, col_from, col_to):
 	name_parts = [type_map[col_type]]
-	name_parts.append(str(col_from, 'utf-8').replace(' ', ''))
+	name_parts.append(col_from.replace(' ', ''))
 	if len(col_to.strip()) > 0:
-		name_parts.append(str(col_to, 'utf-8').replace(' ', ''))
+		name_parts.append(col_to.replace(' ', ''))
 	return ':'.join(name_parts)
 
+# Read PISA-formatted binary PL4 file into a pandas dataframe.
+# :param filename: Filename of PL4 to read from.
+# :return: Pandas dataframe with data from PL4 file.
 def pl4_to_dataframe(filename):
-	"""
-	Read PISA-formatted binary PL4 file into a pandas dataframe.
 
-	:param filename: Filename of PL4 to read from.
-	:return: Pandas dataframe with data from PL4 file.
-	"""
 	dfHEAD, data, miscData = readPL4(filename)
 
 	col_names = [map_name(col.TYPE, col.FROM, col.TO) for col in dfHEAD.itertuples()]

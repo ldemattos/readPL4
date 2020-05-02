@@ -45,7 +45,8 @@ def main(args):
 	convertType(dfHEAD)
 	
 	# Create PL4 object
-	sim_data = pl4_to_dataframe(args[1])
+	# ~ print(args[1])
+	sim_data = pl4_to_dataframe(sys.argv[1])
 	
 	# EXAMPLES
 	###############################################################
