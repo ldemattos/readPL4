@@ -104,7 +104,6 @@ def getVarData(dfHEAD,data,Type,From,To):
 
 	return(data_sel)
 
-
 """
 Information about the meaning of the type codes in the PL4 file is inferred from 
 code in saveToPl4File function in the PlotXY open-source code:
@@ -121,14 +120,12 @@ type_map = {
     8: 'v', # Branch voltage
     9: 'c'} # Branch current
 
-
 def map_name(col_type, col_from, col_to):
 	name_parts = [type_map[col_type]]
 	name_parts.append(str(col_from, 'utf-8').replace(' ', ''))
 	if len(col_to.strip()) > 0:
 		name_parts.append(str(col_to, 'utf-8').replace(' ', ''))
 	return ':'.join(name_parts)
-
 
 def pl4_to_dataframe(filename):
 	"""

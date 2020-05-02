@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 #  readPL4_py3.py
@@ -26,8 +26,8 @@ import sys
 from lib_readPL4_py3 import readPL4
 from lib_readPL4_py3 import convertType
 from lib_readPL4_py3 import getVarData
+from lib_readPL4_py3 import pl4_to_dataframe
 import numpy as np
-
 
 def main(args):
 	
@@ -43,6 +43,9 @@ def main(args):
 	
 	# Convert the header type
 	convertType(dfHEAD)
+	
+	# Create PL4 object
+	sim_data = pl4_to_dataframe(args[1])
 	
 	# EXAMPLES
 	###############################################################
