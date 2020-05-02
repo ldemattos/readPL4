@@ -68,7 +68,10 @@ def readPL4(pl4file):
 		
 		# Correct 'TO' and 'FROM' columns types
 		dfHEAD['FROM'] = dfHEAD['FROM'].str.decode('utf-8')
-		dfHEAD['TO'] = dfHEAD['TO'].str.decode('utf-8')		
+		dfHEAD['TO'] = dfHEAD['TO'].str.decode('utf-8')
+		
+		# Convert types from integers to strings
+		dfHEAD['TYPE'] = dfHEAD['TYPE'].apply(lambda x: type_map[x])		
 		
 		# Check for unexpected rows of zeroes
 		# See https://github.com/ldemattos/readPL4/issues/2
@@ -81,15 +84,6 @@ def readPL4(pl4file):
 		data = np.memmap(f,dtype=np.float32,mode='r',shape=(miscData['steps'],miscData['nvar']+1),offset=(5 + miscData['nvar'])*16 + nullbytes)
 			
 		return dfHEAD,data,miscData
-
-# Convert types from integers to strings
-def convertType(df):	
-	df['TYPE'] = df['TYPE'].apply(lambda x: 'V-node' if x == 4 else x)
-	df['TYPE'] = df['TYPE'].apply(lambda x: 'E-bran' if x == 7 else x)
-	df['TYPE'] = df['TYPE'].apply(lambda x: 'V-bran' if x == 8 else x)
-	df['TYPE'] = df['TYPE'].apply(lambda x: 'I-bran' if x == 9 else x)
-	
-	return 0
 	
 # Get desired variable data
 def getVarData(dfHEAD,data,Type,From,To):
@@ -106,10 +100,22 @@ def getVarData(dfHEAD,data,Type,From,To):
 
 	return(data_sel)
 
-
+# Read PISA-formatted binary PL4 file into a pandas dataframe.
+# Contribution from @pdb5627
+# :param filename: Filename of PL4 to read from.
+# :return: Pandas dataframe with data from PL4 file.
+def pl4_to_dataframe(dfHEAD,data):
+	
+	col_names = []	
+	for i,r in dfHEAD.iterrows():
+		col_names.append(r['TYPE']+':'+r['FROM']+':'+r['TO'])	
+	
+	return pd.DataFrame(data[:, 1:], index=data[:, 0], columns=col_names)
+	
 # Information about the meaning of the type codes in the PL4 file is inferred from 
 # code in saveToPl4File function in the PlotXY open-source code:
 # https://github.com/max-privato/PlotXY_OpenSource/blob/master/CSimOut.cpp
+# Contribution from @pdb5627
 type_map = {
     1: 's', # SM Variable
     2: 't', # TACS variable
@@ -120,20 +126,3 @@ type_map = {
     7: 'e', # Branch energy
     8: 'v', # Branch voltage
     9: 'c'} # Branch current
-
-def map_name(col_type, col_from, col_to):
-	name_parts = [type_map[col_type]]
-	name_parts.append(col_from.replace(' ', ''))
-	if len(col_to.strip()) > 0:
-		name_parts.append(col_to.replace(' ', ''))
-	return ':'.join(name_parts)
-
-# Read PISA-formatted binary PL4 file into a pandas dataframe.
-# :param filename: Filename of PL4 to read from.
-# :return: Pandas dataframe with data from PL4 file.
-def pl4_to_dataframe(filename):
-
-	dfHEAD, data, miscData = readPL4(filename)
-
-	col_names = [map_name(col.TYPE, col.FROM, col.TO) for col in dfHEAD.itertuples()]
-	return pd.DataFrame(data[:, 1:], index=data[:, 0], columns=col_names)

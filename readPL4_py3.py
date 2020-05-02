@@ -24,7 +24,6 @@
 
 import sys
 from lib_readPL4_py3 import readPL4
-from lib_readPL4_py3 import convertType
 from lib_readPL4_py3 import getVarData
 from lib_readPL4_py3 import pl4_to_dataframe
 import numpy as np
@@ -41,21 +40,19 @@ def main(args):
 	print("Data shape:")
 	print(np.shape(data))
 	
-	# Convert the header type
-	convertType(dfHEAD)
-	
-	# Create PL4 object
-	# ~ print(args[1])
-	sim_data = pl4_to_dataframe(sys.argv[1])
-	
 	# EXAMPLES
+	# Check for var types in github wiki
 	###############################################################
 	# Get time
-	time = data[:,0]
+	# ~ time = data[:,0]
 	
-	# Get some variable, remember ATP's variable has a maximum of 6 characters
-	# Check for var types in github wiki
+	# METHOD 1, getting variables as needed:
+	# Get some variable, remember ATP's variable has a maximum of 6 characters	
 	# ~ sel_data = getVarData(dfHEAD,data,'TYPE','FROM','TO')
+	
+	# METHOD 2, read all data into pandas dataframe (everything to memory)	
+	# ~ df_full_pl4 = pl4_to_dataframe(dfHEAD,data)	
+	# df_full_pl4['TYPE:FROM:TO']	
 	
 	# Launch ipython session
 	import IPython as ipy
