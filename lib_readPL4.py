@@ -1,7 +1,7 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  lib_readPL4.py
+#  lib_readPL4_py3.py
 #  https://github.com/ldemattos/readPL4
 #  
 #  Copyright 2019 Leonardo M. N. de Mattos <l@mattos.eng.br>
@@ -20,7 +20,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 #  
-#
+#  
 
 import mmap
 import struct
@@ -46,27 +46,32 @@ def readPL4(pl4file):
 		miscData['deltat'] = struct.unpack('<f', pl4[40:44])[0]
 	
 		# read number of vars
-		miscData['nvar'] = struct.unpack('<L', pl4[48:52])[0] / 2
+		miscData['nvar'] = struct.unpack('<L', pl4[48:52])[0] // 2
 		
 		# read PL4 disk size
 		miscData['pl4size'] = struct.unpack('<L', pl4[56:60])[0]-1
 		
 		# compute the number of simulation miscData['steps'] from the PL4's file size
-		miscData['steps'] = (miscData['pl4size'] - 5*16 - miscData['nvar']*16) / ((miscData['nvar']+1)*4)
+		miscData['steps'] = (miscData['pl4size'] - 5*16 - miscData['nvar']*16) // \
+							((miscData['nvar']+1)*4)
 		miscData['tmax'] = (miscData['steps']-1)*miscData['deltat']
 		
 		# generate pandas dataframe	to store the PL4's header
-		dfHEAD = pd.DataFrame()
-		dfHEAD['TYPE'] = ''
-		dfHEAD['FROM'] = ''
-		dfHEAD['TO'] = ''
+		dfHEAD = pd.DataFrame(columns=['TYPE','FROM','TO'])
 		
-		for i in xrange(0,miscData['nvar']):
+		for i in range(0,miscData['nvar']):
 			pos = 5*16 + i*16
 			h = struct.unpack('3x1c6s6s',pl4[pos:pos+16])
 			dfHEAD = dfHEAD.append({'TYPE': int(h[0]),\
 			                        'FROM': h[1],\
 			                        'TO': h[2]}, ignore_index=True)
+		
+		# Correct 'TO' and 'FROM' columns types
+		dfHEAD['FROM'] = dfHEAD['FROM'].str.decode('utf-8')
+		dfHEAD['TO'] = dfHEAD['TO'].str.decode('utf-8')
+		
+		# Convert types from integers to strings
+		dfHEAD['TYPE'] = dfHEAD['TYPE'].apply(lambda x: type_map[x])		
 		
 		# Check for unexpected rows of zeroes
 		# See https://github.com/ldemattos/readPL4/issues/2
@@ -79,15 +84,6 @@ def readPL4(pl4file):
 		data = np.memmap(f,dtype=np.float32,mode='r',shape=(miscData['steps'],miscData['nvar']+1),offset=(5 + miscData['nvar'])*16 + nullbytes)
 			
 		return dfHEAD,data,miscData
-
-# Convert types from integers to strings
-def convertType(df):	
-	df['TYPE'] = df['TYPE'].apply(lambda x: 'V-node' if x == 4 else x)
-	df['TYPE'] = df['TYPE'].apply(lambda x: 'E-bran' if x == 7 else x)
-	df['TYPE'] = df['TYPE'].apply(lambda x: 'V-bran' if x == 8 else x)
-	df['TYPE'] = df['TYPE'].apply(lambda x: 'I-bran' if x == 9 else x)
-	
-	return 0
 	
 # Get desired variable data
 def getVarData(dfHEAD,data,Type,From,To):
@@ -99,16 +95,27 @@ def getVarData(dfHEAD,data,Type,From,To):
 		data_sel = data[:,df.index.values[0]+1] # One column shift given time vector
 		
 	else:
-		print "Variable %s-%s of %s not found!"%(From,To,Type) 
+		print("Variable %s-%s of %s not found!"%(From,To,Type))
 		return(None)
 
 	return(data_sel)
 
-"""
-Information about the meaning of the type codes in the PL4 file is inferred from 
-code in saveToPl4File function in the PlotXY open-source code:
-https://github.com/max-privato/PlotXY_OpenSource/blob/master/CSimOut.cpp
-"""
+# Read PISA-formatted binary PL4 file into a pandas dataframe.
+# Contribution from @pdb5627
+# :param filename: Filename of PL4 to read from.
+# :return: Pandas dataframe with data from PL4 file.
+def pl4_to_dataframe(dfHEAD,data):
+	
+	col_names = []	
+	for i,r in dfHEAD.iterrows():
+		col_names.append(r['TYPE']+':'+r['FROM']+':'+r['TO'])	
+	
+	return pd.DataFrame(data[:, 1:], index=data[:, 0], columns=col_names)
+	
+# Information about the meaning of the type codes in the PL4 file is inferred from 
+# code in saveToPl4File function in the PlotXY open-source code:
+# https://github.com/max-privato/PlotXY_OpenSource/blob/master/CSimOut.cpp
+# Contribution from @pdb5627
 type_map = {
     1: 's', # SM Variable
     2: 't', # TACS variable
@@ -119,22 +126,3 @@ type_map = {
     7: 'e', # Branch energy
     8: 'v', # Branch voltage
     9: 'c'} # Branch current
-
-def map_name(col_type, col_from, col_to):
-	name_parts = [type_map[col_type]]
-	name_parts.append(str(col_from, 'utf-8').replace(' ', ''))
-	if len(col_to.strip()) > 0:
-		name_parts.append(str(col_to, 'utf-8').replace(' ', ''))
-	return ':'.join(name_parts)
-
-def pl4_to_dataframe(filename):
-	"""
-	Read PISA-formatted binary PL4 file into a pandas dataframe.
-
-	:param filename: Filename of PL4 to read from.
-	:return: Pandas dataframe with data from PL4 file.
-	"""
-	dfHEAD, data, miscData = readPL4(filename)
-
-	col_names = [map_name(col.TYPE, col.FROM, col.TO) for col in dfHEAD.itertuples()]
-	return pd.DataFrame(data[:, 1:], index=data[:, 0], columns=col_names)
