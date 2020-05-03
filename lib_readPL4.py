@@ -106,11 +106,9 @@ def getVarData(dfHEAD,data,Type,From,To):
 # :return: Pandas dataframe with data from PL4 file.
 def pl4_to_dataframe(dfHEAD,data):
 	
-	col_names = []	
-	for i,r in dfHEAD.iterrows():
-		col_names.append(r['TYPE']+':'+r['FROM']+':'+r['TO'])	
+	col_names = dfHEAD['TYPE']+':'+dfHEAD['FROM']+':'+dfHEAD['TO']	
 	
-	return pd.DataFrame(data[:, 1:], index=data[:, 0], columns=col_names)
+	return(pd.DataFrame(data[:, 1:], index=data[:, 0], columns=col_names))
 	
 # Information about the meaning of the type codes in the PL4 file is inferred from 
 # code in saveToPl4File function in the PlotXY open-source code:
