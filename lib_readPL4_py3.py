@@ -57,10 +57,7 @@ def readPL4(pl4file):
 		miscData['tmax'] = (miscData['steps']-1)*miscData['deltat']
 		
 		# generate pandas dataframe	to store the PL4's header
-		dfHEAD = pd.DataFrame()
-		dfHEAD['TYPE'] = ''
-		dfHEAD['FROM'] = ''
-		dfHEAD['TO'] = ''
+		dfHEAD = pd.DataFrame(columns=['TYPE','FROM','TO'])
 		
 		for i in range(0,miscData['nvar']):
 			pos = 5*16 + i*16
@@ -68,6 +65,10 @@ def readPL4(pl4file):
 			dfHEAD = dfHEAD.append({'TYPE': int(h[0]),\
 			                        'FROM': h[1],\
 			                        'TO': h[2]}, ignore_index=True)
+		
+		# Correct 'TO' and 'FROM' columns types
+		dfHEAD['FROM'] = dfHEAD['FROM'].str.decode('utf-8')
+		dfHEAD['TO'] = dfHEAD['TO'].str.decode('utf-8')
 		
 		# Check for unexpected rows of zeroes
 		# See https://github.com/ldemattos/readPL4/issues/2
