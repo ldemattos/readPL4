@@ -62,7 +62,12 @@ def readPL4(pl4file):
 		for i in range(0,miscData['nvar']):
 			pos = 5*16 + i*16
 			h = struct.unpack('3x1c6s6s',pl4[pos:pos+16])
-			dfHEAD = dfHEAD.append({'TYPE': int(h[0]),\
+			if (float(pd.__version__[0:3]) >= 1.4):
+				dfHEAD.loc[len(dfHEAD)] = {'TYPE': int(h[0]),\
+							   'FROM': h[1],\
+							   'TO': h[2]}
+			else:
+				dfHEAD = dfHEAD.append({'TYPE': int(h[0]),\
 			                        'FROM': h[1],\
 			                        'TO': h[2]}, ignore_index=True)
 		
